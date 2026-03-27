@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "../../../../lib/mongodb";
 import Blog from "../../../../model/Blog";
 import { Category } from "../../../../model";
+import { pagenation } from "@/lib/pagenation";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
-        await connectDB();
-        await Category.init()
-
-        const post = await Blog.find().populate('category', 'category').populate('userId', 'username');
+        const searchParams = request.nextUrl.searchParams;
+        await connectDB()
+        const baseQuery = await pagenation(searchParams);
+        const post = await Blog.find({}, {}, baseQuery).populate('category', 'category').populate('userId', 'username');
 
         console.log("Find Data for Post: ", post);
 
